@@ -14,6 +14,10 @@ public class Option {
 
     @Column(nullable = false)
     private Boolean correct;
+    
+//    @ManyToOne
+//    @JoinColumn(name = "quiz_id", nullable = false)
+//    private Quiz quiz;
 
     private int position;
 
@@ -55,6 +59,14 @@ public class Option {
     public void setPosition(int position) {
         this.position = position;
     }
+    
+//    public Quiz getQuiz() {
+//        return quiz;
+//    }
+//
+//    public void setQuiz(Quiz quiz) {
+//        this.quiz = quiz;
+//    }
 
     @Override
     public String toString() {

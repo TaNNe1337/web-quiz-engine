@@ -6,6 +6,7 @@ import org.hyperskill.webquizengine.exception.UserNotFoundException;
 import org.hyperskill.webquizengine.model.Quiz;
 import org.hyperskill.webquizengine.model.User;
 import org.hyperskill.webquizengine.repository.CompletionRepository;
+import org.hyperskill.webquizengine.repository.OptionRepository;
 import org.hyperskill.webquizengine.repository.QuizRepository;
 import org.hyperskill.webquizengine.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,10 +40,14 @@ public class QuizServiceTest {
 
     @MockBean
     private CompletionRepository completionRepository;
+    
+    @MockBean
+    private OptionRepository optionRepository;
+    
 
     @BeforeEach
     void init() {
-        service = new QuizService(quizRepository, userRepository, completionRepository);
+        service = new QuizService(quizRepository, userRepository, completionRepository, optionRepository);
     }
 
     @Test
@@ -189,6 +194,21 @@ public class QuizServiceTest {
         when(quizRepository.findById(anyLong())).thenReturn(Optional.of(quiz));
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
 
+        service.delete(quiz.getId(), user.getUsername());
+    }
+    @Test
+    public void testDelete_whenCompletedSuccess() {
+        var quiz = createQuizEntityWithId(10L);
+        var user = createTestUserWithDefaultName();
+        quiz.setCreatedBy(user);
+        quiz.setOptions(List.of(
+                newOption("a", true),
+                newOption("b", false),
+                newOption("c", false)
+        ));
+        when(quizRepository.findById(anyLong())).thenReturn(Optional.of(quiz));
+        when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
+        service.solve(quiz.getId(), Set.of(0), user.getUsername());
         service.delete(quiz.getId(), user.getUsername());
     }
 

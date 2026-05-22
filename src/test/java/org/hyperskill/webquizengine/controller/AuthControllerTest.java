@@ -1,7 +1,7 @@
 package org.hyperskill.webquizengine.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hyperskill.webquizengine.dto.UserDto;
+import org.hyperskill.webquizengine.dto.UsersDto;
 import org.hyperskill.webquizengine.exception.DuplicateEmailException;
 import org.hyperskill.webquizengine.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class AuthControllerTest {
 
     @Test
     public void testRegister_whenSuccessful() throws Exception {
-        var userDto = new UserDto();
+        var userDto = new UsersDto();
         userDto.setEmail(DEFAULT_USERNAME);
         userDto.setPassword(DEFAULT_PASSWORD);
 
@@ -52,7 +52,7 @@ public class AuthControllerTest {
 
     @Test
     public void testRegister_whenPasswordTooShort() throws Exception {
-        var userDto = new UserDto();
+        var userDto = new UsersDto();
         userDto.setEmail(DEFAULT_USERNAME);
         userDto.setPassword("123");
 
@@ -66,7 +66,7 @@ public class AuthControllerTest {
 
     @Test
     public void testRegister_whenUsernameIsNotEmail() throws Exception {
-        var userDto = new UserDto();
+        var userDto = new UsersDto();
         userDto.setEmail("abcde");
         userDto.setPassword(DEFAULT_PASSWORD);
 
@@ -80,7 +80,7 @@ public class AuthControllerTest {
 
     @Test
     public void testRegister_whenDuplicateEmail() throws Exception {
-        var userDto = new UserDto();
+        var userDto = new UsersDto();
         userDto.setEmail(DEFAULT_USERNAME);
         userDto.setPassword(DEFAULT_PASSWORD);
 

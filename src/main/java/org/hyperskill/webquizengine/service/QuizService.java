@@ -5,8 +5,10 @@ import org.hyperskill.webquizengine.exception.NotPermittedException;
 import org.hyperskill.webquizengine.exception.QuizNotFoundException;
 import org.hyperskill.webquizengine.exception.UserNotFoundException;
 import org.hyperskill.webquizengine.model.Completion;
+import org.hyperskill.webquizengine.model.Option;
 import org.hyperskill.webquizengine.model.Quiz;
 import org.hyperskill.webquizengine.repository.CompletionRepository;
+import org.hyperskill.webquizengine.repository.OptionRepository;
 import org.hyperskill.webquizengine.repository.QuizRepository;
 import org.hyperskill.webquizengine.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,14 +29,16 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final UserRepository userRepository;
     private final CompletionRepository completionRepository;
+    private final OptionRepository optionRepository;
 
     @Autowired
     public QuizService(QuizRepository quizRepository,
                        UserRepository userRepository,
-                       CompletionRepository completionRepository) {
+                       CompletionRepository completionRepository, OptionRepository optionRepository) {
         this.quizRepository = quizRepository;
         this.userRepository = userRepository;
         this.completionRepository = completionRepository;
+        this.optionRepository = optionRepository;
     }
 
     public boolean solve(long quizId, Set<Integer> answer, String username) {
@@ -71,7 +76,12 @@ public class QuizService {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
         if (Objects.equals(quiz.getCreatedBy().getId(), user.getId())) {
+        	List<Completion> completions = findAllCompletedQuizzesByQuizId(quizId);
+        	completionRepository.deleteAll(completions);
+        	List<Option> options = optionRepository.findAllByQuiz(quizId);
+        	optionRepository.deleteAll(options);
             quizRepository.delete(quiz);
+            
         } else {
             throw new NotPermittedException();
         }
@@ -83,5 +93,9 @@ public class QuizService {
 
     public Page<Completion> findAllCompletedQuizzesAsPage(String username, Pageable pageable) {
         return completionRepository.findAllByUserOrderByCompletedAtDesc(username, pageable);
+    }
+    
+    public List<Completion> findAllCompletedQuizzesByQuizId(Long quizid){
+    	return completionRepository.findAllByQuiz(quizid);
     }
 }

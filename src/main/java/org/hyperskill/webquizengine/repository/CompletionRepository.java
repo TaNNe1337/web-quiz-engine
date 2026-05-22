@@ -1,5 +1,7 @@
 package org.hyperskill.webquizengine.repository;
 
+import java.util.List;
+
 import org.hyperskill.webquizengine.model.Completion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,4 +14,8 @@ public interface CompletionRepository extends CrudRepository<Completion, Long> {
 
     @Query("SELECT c FROM Completion c where c.user.username = :username order by c.completedAt desc")
     Page<Completion> findAllByUserOrderByCompletedAtDesc(String username, Pageable pageable);
+    
+    @Query("SELECT c FROM Completion c where c.quiz.id = :quizid")
+    List<Completion> findAllByQuiz(Long quizid);
+
 }
