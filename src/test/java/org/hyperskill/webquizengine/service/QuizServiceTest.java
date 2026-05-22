@@ -64,7 +64,30 @@ public class QuizServiceTest {
 
         assertEquals(quiz.getId(), id);
     }
+    @Test
+    public void testPutQuiz() {
+        var quiz = createQuizEntityWithId(1L);
+        var user = createTestUserWithDefaultName();
+        quiz.setCreatedBy(user);
+        quiz.setOptions(List.of(
+                newOption("a", true),
+                newOption("b", false),
+                newOption("c", false)
+        ));
+        when(quizRepository.save(any())).thenReturn(quiz);
+        when(quizRepository.findById(anyLong())).thenReturn(Optional.of(quiz));
+        when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
 
+        var quizDto = convertQuizEntityToDtoWithoutAnswer(quiz);
+        var id = service.create(quizDto, user.getUsername());
+        quiz.setTitle("Updated title");
+        quizDto = convertQuizEntityToDtoWithoutAnswer(quiz);
+        quizDto.setAnswer(Set.of(0));
+        var newQuiz = service.put(id, quizDto, user.getUsername());
+        
+        assertEquals("Updated title", newQuiz.getTitle());
+        assertEquals(newQuiz.getId(), id);
+    }
     @Test
     public void testCreateQuiz_whenNoUserFound() {
         var quiz = createQuizEntityWithId(5L);

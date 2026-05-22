@@ -60,6 +60,16 @@ public class QuizController {
     public QuizDto getRandomQuiz() {
 		return convertQuizEntityToDtoWithoutAnswer(service.findRandom());
 	}
+    
+    @PutMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    public QuizDto putQuiz(@PathVariable long id,
+							  @Valid @RequestBody QuizDto quizDto,
+							  @Autowired Principal principal) {
+		logger.info("User {} wants to update a quiz with id {} to {}", principal.getName(), id, quizDto);
+		checkAnswerOptions(quizDto);
+		service.put(id, quizDto, principal.getName());
+		return quizDto;
+	}
 
     @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.NO_CONTENT)

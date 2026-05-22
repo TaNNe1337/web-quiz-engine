@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import static org.hyperskill.webquizengine.model.Completion.createCompletion;
 import static org.hyperskill.webquizengine.util.Utils.convertQuizDtoToEntity;
 import static org.hyperskill.webquizengine.util.Utils.getCorrectOptionsIndexes;
@@ -102,5 +104,20 @@ public class QuizService {
 	public Quiz findRandom() {
 		var quiz = quizRepository.findRandom();
 		return quiz.orElseThrow(QuizNotFoundException::new);
+	}
+
+	public Quiz put(long id, @Valid QuizDto quizDto, String name) {
+		var quiz = findById(id);
+		var user = userRepository.findByUsername(name)
+				.orElseThrow(UserNotFoundException::new);
+		if (Objects.equals(quiz.getCreatedBy().getId(), user.getId())) {
+			quiz = convertQuizDtoToEntity(quizDto);
+			quiz.setId(id);
+			quiz.setCreatedBy(user);
+			quizRepository.save(quiz);
+		} else {
+			throw new NotPermittedException();
+		}
+		return quiz;
 	}
 }
