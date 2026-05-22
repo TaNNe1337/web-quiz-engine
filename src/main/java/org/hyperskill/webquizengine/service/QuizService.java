@@ -98,4 +98,9 @@ public class QuizService {
     public List<Completion> findAllCompletedQuizzesByQuizId(Long quizid){
     	return completionRepository.findAllByQuiz(quizid);
     }
+
+	public Quiz findRandom() {
+		var quiz = quizRepository.findRandom();
+		return quiz.orElseThrow(QuizNotFoundException::new);
+	}
 }

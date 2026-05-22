@@ -55,6 +55,11 @@ public class QuizController {
     public QuizDto getQuiz(@PathVariable long id) {
         return convertQuizEntityToDtoWithoutAnswer(service.findById(id));
     }
+    
+    @GetMapping(path = "/random", produces = APPLICATION_JSON_VALUE)
+    public QuizDto getRandomQuiz() {
+		return convertQuizEntityToDtoWithoutAnswer(service.findRandom());
+	}
 
     @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.NO_CONTENT)

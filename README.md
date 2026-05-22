@@ -103,6 +103,23 @@ The response does not contain `answer`:
 If the quiz does not exist, the server returns `HTTP 404`.
 
 ---
+### Get a random quiz
+
+To get random quiz, you need to send a GET request to `api/quizzes/random`
+
+```
+curl --user test@gmail.com:secret -X GET http://localhost:8888/api/quizzes/random
+```
+
+The response does not contain `answer`:
+
+```json
+{"id":1,"title":"The Java Logo","text":"What is depicted on the Java logo?","options":["Robot","Tea leaf","Cup of coffee","Bug"]}
+```
+
+If there is no quiz yet, the server returns `HTTP 404`.
+
+---
 
 ### Get all quizzes (with paging)
 
