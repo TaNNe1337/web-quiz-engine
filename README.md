@@ -87,6 +87,32 @@ If the number of options in the quiz is less than 2, the response is `404` as we
 
 ---
 
+### Create multiple new quizes
+
+To create a new quiz, you need to send a JSON via `POST` request to `/quizzes/batch` containing a list of objects with the following keys:
+- `title`: string, required;
+- `text`: string, required;
+- `options`: an array of strings, it's required, and should contain at least 2 items;
+- `answer`: an array of indexes of correct options, it's optional since all options can be wrong.
+
+An example of the request:
+
+```
+curl --user test@gmail.com:secret -X POST -H "Content-Type: application/json" \
+-d '[{"title":"The Java Logo", "text":"What is depicted on the Java logo?", "options": ["Robot", "Tea leaf", "Cup of coffee", "Bug"], "answer": [2]}]' \
+http://localhost:8888/api/quizzes/batch
+```
+
+The response contains the same JSON with generated `id`, but does not include `answer`.
+```json
+{"id":1,"title":"The Java Logo","text":"What is depicted on the Java logo?","options":["Robot","Tea leaf","Cup of coffee","Bug"]}
+```
+
+If the request JSON does not contain `title` or `text`, or they are empty strings (`""`), then the response is `404`.
+If the number of options in the quiz is less than 2, the response is `404` as well.
+
+---
+
 ### Get a quiz
 
 To get an info about a quiz, you need to specify its `id` in url.
