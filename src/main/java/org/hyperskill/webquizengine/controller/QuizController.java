@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hyperskill.webquizengine.util.Utils.checkAnswerOptions;
 import static org.hyperskill.webquizengine.util.Utils.convertQuizEntityToDtoWithoutAnswer;
@@ -40,7 +42,19 @@ public class QuizController {
         return service.solve(id, answer, principal.getName()) ?
                 ResultDto.success() : ResultDto.failure();
     }
+    @PostMapping(path = "/batch", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    public List<QuizDto> createQuizBatch(@Valid @RequestBody List<QuizDto> quizDtos,
+                                    @Autowired Principal principal) {
+        logger.info("User {} wants to create {} quizzes", principal.getName(), quizDtos.size());
 
+        return quizDtos.stream()
+                .peek(quizDto -> {
+                    checkAnswerOptions(quizDto);
+                    var id = service.create(quizDto, principal.getName());
+                    quizDto.setId(id);
+                })
+                .collect(Collectors.toList());
+    }
     @PostMapping(produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     public QuizDto createQuiz(@Valid @RequestBody QuizDto quizDto,
                               @Autowired Principal principal) {
