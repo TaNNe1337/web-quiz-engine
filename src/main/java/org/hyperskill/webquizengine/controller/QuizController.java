@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import static org.hyperskill.webquizengine.util.Utils.checkAnswerOptions;
 import static org.hyperskill.webquizengine.util.Utils.convertQuizEntityToDtoWithoutAnswer;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path = "/quizzes")
 public class QuizController {
