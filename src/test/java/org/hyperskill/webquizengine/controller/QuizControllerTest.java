@@ -108,7 +108,6 @@ public class QuizControllerTest {
     }
 
     @Test
-    @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
     public void testGetQuiz_whenExists() throws Exception {
         var quiz = createJavaLogoQuizWithId(1L);
 
@@ -128,11 +127,6 @@ public class QuizControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    public void testGetQuiz_whenUnauthorized() throws Exception {
-        mvc.perform(get(String.format("/quizzes/%d", 1)))
-                .andExpect(status().isUnauthorized());
-    }
 
     @Test
     @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
