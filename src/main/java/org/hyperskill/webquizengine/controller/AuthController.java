@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-@CrossOrigin(origins = {"https://htw-dresden.de", "https://informatik.htw-dresden.de"})
+@CrossOrigin(origins = "*")
 @RestController
 public class AuthController {
     private final Logger logger = LoggerFactory.getLogger(AuthController.class);
