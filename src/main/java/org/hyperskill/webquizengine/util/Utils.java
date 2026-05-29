@@ -1,9 +1,11 @@
 package org.hyperskill.webquizengine.util;
 
 import org.hyperskill.webquizengine.dto.CompletionDto;
+import org.hyperskill.webquizengine.dto.IndexCardDto;
 import org.hyperskill.webquizengine.exception.InvalidAnswerOptions;
 import org.hyperskill.webquizengine.dto.QuizDto;
 import org.hyperskill.webquizengine.model.Completion;
+import org.hyperskill.webquizengine.model.IndexCard;
 import org.hyperskill.webquizengine.model.Option;
 import org.hyperskill.webquizengine.model.Quiz;
 
@@ -55,6 +57,24 @@ public final class Utils {
                 .map(Option::getText)
                 .collect(Collectors.toList()));
         return quizDto;
+    }
+
+    public static IndexCardDto convertIndexCardEntityToDto(IndexCard indexCard){
+        var indexCardDto = new IndexCardDto();
+        indexCardDto.setId(indexCard.getId());
+        indexCardDto.setTitle(indexCard.getTitle());
+        indexCardDto.setText(indexCard.getText());
+        indexCardDto.setAnswer(indexCard.getAnswer());
+        return indexCardDto;
+    }
+
+    public static IndexCard convertIndexCardDtoToEntity(IndexCardDto indexCardDto){
+        var indexCard = new IndexCard();
+        indexCard.setId(indexCardDto.getId());
+        indexCard.setTitle(indexCardDto.getTitle());
+        indexCard.setText(indexCardDto.getText());
+        indexCard.setAnswer(indexCardDto.getAnswer());
+        return indexCard;
     }
 
     public static Set<Integer> getCorrectOptionsIndexes(List<Option> options) {

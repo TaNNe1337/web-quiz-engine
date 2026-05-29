@@ -1,5 +1,6 @@
 package org.hyperskill.webquizengine.testutils;
 
+import org.hyperskill.webquizengine.dto.IndexCardDto;
 import org.hyperskill.webquizengine.dto.QuizDto;
 import org.hyperskill.webquizengine.model.Quiz;
 import org.hyperskill.webquizengine.model.User;
@@ -34,6 +35,17 @@ public final class TestUtils {
         quiz.setAnswer(Set.of(DEFAULT_CORRECT_OPTION));
         return quiz;
     }
+    public static IndexCardDto createIndexCardWithoutId() {
+        return createIndexCardWithId(null);
+    }
+    public static IndexCardDto createIndexCardWithId(Long id) {
+        var indexCard = new IndexCardDto();
+        indexCard.setId(id);
+        indexCard.setTitle("The Hitchhiker’s Guide to the Galaxy");
+        indexCard.setText("The Answer to the Ultimate Question of Life, the Universe, and Everything is?");
+        indexCard.setAnswer("42");
+        return indexCard;
+    }
 
     public static ResultActions expectQuizJsonIsValid(ResultActions actions, QuizDto quiz) throws Exception {
         return actions
@@ -46,6 +58,14 @@ public final class TestUtils {
                 .andExpect(jsonPath("$.options", hasItem("Tea leaf")))
                 .andExpect(jsonPath("$.options", hasItem("Cup of coffee")))
                 .andExpect(jsonPath("$.options", hasItem("Bug")));
+    }
+
+    public static ResultActions expectIndexCardJsonIsValid(ResultActions actions, IndexCardDto indexCard) throws Exception {
+        return actions
+                .andExpect(jsonPath("$.id").value(indexCard.getId()))
+                .andExpect(jsonPath("$.title").value(indexCard.getTitle()))
+                .andExpect(jsonPath("$.text").value(indexCard.getText()))
+                .andExpect(jsonPath("$.answer").value("42"));
     }
 
     public static List<Quiz> createTestQuizzes(int n) {
