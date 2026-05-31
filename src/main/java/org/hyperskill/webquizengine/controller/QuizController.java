@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static org.hyperskill.webquizengine.util.Utils.checkAnswerOptions;
 import static org.hyperskill.webquizengine.util.Utils.convertQuizEntityToDtoWithoutAnswer;
+import static org.hyperskill.webquizengine.util.Utils.convertQuizEntityToDtoWithAnswer;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @CrossOrigin(origins = "*")
 @RestController
@@ -81,8 +82,8 @@ public class QuizController {
 							  @Autowired Principal principal) {
 		logger.info("User {} wants to update a quiz with id {} to {}", principal.getName(), id, quizDto);
 		checkAnswerOptions(quizDto);
-		service.put(id, quizDto, principal.getName());
-		return quizDto;
+		var quiz = service.put(id, quizDto, principal.getName());
+		return convertQuizEntityToDtoWithAnswer(quiz);
 	}
 
     @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
