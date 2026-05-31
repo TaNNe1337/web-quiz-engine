@@ -60,13 +60,7 @@ public final class Utils {
     }
 
     public static QuizDto convertQuizEntityToDtoWithAnswer(Quiz quiz) {
-        var quizDto = new QuizDto();
-        quizDto.setId(quiz.getId());
-        quizDto.setTitle(quiz.getTitle());
-        quizDto.setText(quiz.getText());
-        quizDto.setOptions(quiz.getOptions().stream()
-                .map(Option::getText)
-                .collect(Collectors.toList()));
+        var quizDto = convertQuizEntityToDtoWithoutAnswer(quiz);
         quizDto.setAnswer(getCorrectOptionsIndexes(quiz.getOptions()));
         return quizDto;
     }
