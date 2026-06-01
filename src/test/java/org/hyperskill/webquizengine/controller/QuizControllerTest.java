@@ -1,6 +1,7 @@
 package org.hyperskill.webquizengine.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hyperskill.webquizengine.dto.QuizDto;
 import org.hyperskill.webquizengine.exception.InvalidAnswerOptions;
 import org.hyperskill.webquizengine.exception.QuizNotFoundException;
 import org.hyperskill.webquizengine.service.QuizService;
@@ -24,6 +25,7 @@ import static org.hyperskill.webquizengine.testutils.TestUtils.*;
 import static org.hyperskill.webquizengine.util.Utils.convertQuizDtoToEntity;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -119,7 +121,6 @@ public class QuizControllerTest {
     }
 
     @Test
-    @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
     public void testGetQuiz_whenQuizNotFound() throws Exception {
         when(quizService.findById(anyLong())).thenThrow(QuizNotFoundException.class);
 
@@ -129,7 +130,6 @@ public class QuizControllerTest {
 
 
     @Test
-    @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
     void testGetQuizList_evaluatesPageableParameter() throws Exception {
         var quizzes = createTestQuizzes(15);
 
@@ -143,7 +143,6 @@ public class QuizControllerTest {
     }
 
     @Test
-    @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
     public void testGetQuizList_whenManyQuizzes() throws Exception {
         var quizzes = createTestQuizzes(15);
 
@@ -156,7 +155,6 @@ public class QuizControllerTest {
     }
 
     @Test
-    @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
     public void testGetQuizList_whenNoQuizzes() throws Exception {
         when(quizService.findAllAsPage(any())).thenReturn(new PageImpl<>(List.of()));
 
@@ -228,5 +226,74 @@ public class QuizControllerTest {
     public void testDeleteQuiz_whenUnauthorized() throws Exception {
         mvc.perform(delete(String.format("/quizzes/%d", 1)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
+    public void testUpdateQuiz_whenSuccessful() throws Exception {
+        long quizId = 1L;
+
+        var updateQuizDto = new QuizDto();
+        updateQuizDto.setTitle("Python Programming Basics");
+        updateQuizDto.setText("What is the output of print(2 ** 3)?");
+        updateQuizDto.setOptions(List.of("6", "8", "9", "16"));
+        updateQuizDto.setAnswer(Set.of(1));
+
+        var updatedQuiz = new QuizDto();
+        updatedQuiz.setId(quizId);
+        updatedQuiz.setTitle("Advanced Python Concepts");
+        updatedQuiz.setText("What does enumerate() return?");
+        updatedQuiz.setOptions(List.of("Index", "Value", "Tuple", "Iterator"));
+        updatedQuiz.setAnswer(Set.of(2));
+
+        when(quizService.put(eq(quizId), any(QuizDto.class), anyString()))
+                .thenReturn(convertQuizDtoToEntity(updatedQuiz));
+
+        mvc.perform(put(String.format("/quizzes/%d", quizId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(updateQuizDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(quizId))
+                .andExpect(jsonPath("$.title").value("Advanced Python Concepts"))
+                .andExpect(jsonPath("$.text").value("What does enumerate() return?"))
+                .andExpect(jsonPath("$.options", hasSize(4)))
+                .andExpect(jsonPath("$.options[0]").value("Index"))
+                .andExpect(jsonPath("$.options[1]").value("Value"))
+                .andExpect(jsonPath("$.options[2]").value("Tuple"))
+                .andExpect(jsonPath("$.options[3]").value("Iterator"));
+    }
+
+    @Test
+    @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
+    public void testDeleteQuiz_afterSolving() throws Exception {
+        long quizId = 1L;
+        var quizWithId = createJavaLogoQuizWithId(quizId);
+        var quizWithoutId = createJavaLogoQuizWithoutId();
+
+        // Mock für create
+        when(quizService.create(any(), anyString())).thenReturn(quizId);
+
+        // Mock für findById (beim solve und delete)
+        when(quizService.findById(quizId)).thenReturn(convertQuizDtoToEntity(quizWithId));
+
+        // Mock für solve - erfolgreich gelöst
+        when(quizService.solve(anyLong(), anySet(), anyString())).thenReturn(true);
+
+        // Erstelle das Quiz
+        mvc.perform(post("/quizzes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(quizWithoutId)))
+                .andExpect(status().isOk());
+
+        // Löse das Quiz
+        mvc.perform(post(String.format("/quizzes/%d/solve", quizId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(Set.of(2))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+
+        // Lösche das Quiz
+        mvc.perform(delete(String.format("/quizzes/%d", quizId)))
+                .andExpect(status().is2xxSuccessful());
     }
 }
