@@ -1,17 +1,10 @@
 package org.hyperskill.webquizengine.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class IndexCardDto {
-
     private Long id;
 
     @NotNull(message = "Index card must have a title")
@@ -34,12 +27,22 @@ public class IndexCardDto {
         this.id = id;
     }
 
+    public IndexCardDto id(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public String getTitle() {
         return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public IndexCardDto title(String title) {
+        this.title = title;
+        return this;
     }
 
     public String getText() {
@@ -50,6 +53,11 @@ public class IndexCardDto {
         this.text = text;
     }
 
+    public IndexCardDto text(String text) {
+        this.text = text;
+        return this;
+    }
+
     public String getAnswer() {
         return answer;
     }
@@ -57,6 +65,11 @@ public class IndexCardDto {
     public void setAnswer(String answer) {
         this.answer = answer;
     }
+    public IndexCardDto answer(String answer) {
+        this.answer = answer;
+        return this;
+    }
+
 
     @Override
     public String toString() {

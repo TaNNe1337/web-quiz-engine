@@ -2,6 +2,7 @@ package org.hyperskill.webquizengine.testutils;
 
 import org.hyperskill.webquizengine.dto.IndexCardDto;
 import org.hyperskill.webquizengine.dto.QuizDto;
+import org.hyperskill.webquizengine.model.IndexCard;
 import org.hyperskill.webquizengine.model.Quiz;
 import org.hyperskill.webquizengine.model.User;
 import org.springframework.test.web.servlet.ResultActions;
@@ -70,6 +71,12 @@ public final class TestUtils {
 
     public static List<Quiz> createTestQuizzes(int n) {
         return Stream.generate(Quiz::new)
+                .limit(10)
+                .collect(Collectors.toList());
+    }
+
+    public static List<IndexCard> createTestIndexCards(int n) {
+        return Stream.generate(IndexCard::new)
                 .limit(10)
                 .collect(Collectors.toList());
     }
