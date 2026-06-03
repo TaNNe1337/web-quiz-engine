@@ -131,10 +131,13 @@ If the quiz does not exist, the server returns `HTTP 404`.
 ---
 ### Get a random quiz
 
-To get random quiz, you need to send a GET request to `api/quizzes/random`
+To get random quizzes, you need to send a GET request to `api/quizzes/random`
 
 ```
-curl --user test@gmail.com:secret -X GET http://localhost:8888/api/quizzes/random
+curl --user test@gmail.com:secret -X GET http://localhost:8888/api/quizzes/random?number=x
+```
+
+Where `x` is the number of random quizzes you want to get. If `x` is not specified, the server returns one random quiz.
 ```
 
 The response does not contain `answer`:
@@ -253,3 +256,162 @@ If the operation was successful, the service returns `HTTP 204 (No content)`.
 
 If the specified quiz does not exist, the server returns `HTTP 404`.
 If the specified user is not the creator of this quiz, the response contains `HTTP 403 (Forbidden)`.
+
+# Index Card Engine
+A simple engine for creating and managing index cards through HTTP API.
+
+It uses an embedded H2 database to store all data in the file system.
+
+## Description
+
+The service API supports creating, getting, updating, and deleting index cards.
+Each index card has an id, a question, and an answer.
+
+To perform any actions with index cards a user has to be registered and then authorized via HTTP Basic Auth.
+Otherwise, the service returns the `HTTP 401 (Unauthorized)` code.
+
+The following are examples of all supported requests and responses using `curl`.
+
+---
+
+### Create a new index card
+
+To create a new index card, you need to send a JSON via `POST` request with the following keys:
+- `question`: string, required;
+- `answer`: string, required.
+
+An example of the request:
+
+```
+curl --user test@gmail.com:secret -X POST -H "Content-Type: application/json" \
+-d '{"question":"What is the capital of Germany?", "answer":"Berlin"}' \
+http://localhost:8888/api/indexcards
+```
+
+The response contains the same JSON with a generated `id`:
+```json
+{"id":1,"question":"What is the capital of Germany?","answer":"Berlin"}
+```
+
+If the request JSON does not contain `question` or `answer`, or they are empty strings (`""`), then the response is `HTTP 400`.
+
+---
+
+### Create multiple index cards
+
+To create multiple index cards at once, you need to send a JSON array via `POST` request to `/indexcards/batch`:
+
+```
+curl --user test@gmail.com:secret -X POST -H "Content-Type: application/json" \
+-d '[{"question":"Question 1","answer":"Answer 1"},{"question":"Question 2","answer":"Answer 2"}]' \
+http://localhost:8888/api/indexcards/batch
+```
+
+The response contains the same JSON array with generated `id`s:
+```json
+[
+  {"id":1,"question":"Question 1","answer":"Answer 1"},
+  {"id":2,"question":"Question 2","answer":"Answer 2"}
+]
+```
+
+---
+
+### Get an index card
+
+To get info about an index card, you need to specify its `id` in the URL.
+
+```
+curl --user test@gmail.com:secret -X GET http://localhost:8888/api/indexcards/1
+```
+
+The response:
+```json
+{"id":1,"question":"What is the capital of Germany?","answer":"Berlin"}
+```
+
+If the index card does not exist, the server returns `HTTP 404`.
+
+---
+
+### Get a random index card
+
+To get a random index card, you need to send a `GET` request to `/indexcards/random`.
+
+```
+curl --user test@gmail.com:secret -X GET http://localhost:8888/api/indexcards/random
+```
+
+The response:
+```json
+{"id":1,"question":"What is the capital of Germany?","answer":"Berlin"}
+```
+
+If there are no index cards yet, the server returns `HTTP 404`.
+
+---
+
+### Get all index cards (with paging)
+
+The number of stored index cards can be very large.
+In this regard, obtaining all index cards is performed page by page: 10 cards at once.
+Here is an example:
+
+```
+curl --user test@gmail.com:secret -X GET http://localhost:8888/api/indexcards
+```
+
+The response contains a JSON with index cards (inside `content`) and some additional metadata:
+
+```json
+{
+  "totalPages":1, "totalElements":2, "last":true, "first":true, "sort":{ }, "number":0,
+  "numberOfElements":2, "size":10, "empty":false, "pageable": { },
+  "content":[
+    {"id":1,"question":"What is the capital of Germany?","answer":"Berlin"},
+    {"id":2,"question":"What is the capital of France?","answer":"Paris"}
+  ]
+}
+```
+
+We can pass the `page` param to navigate through pages `/api/indexcards?page=1`.
+Pages start from 0 (the first page).
+
+If there are no index cards, `content` is empty.
+
+In all cases, the status code is `HTTP 200 (OK)`.
+
+---
+
+### Update an index card
+
+It is possible to update an index card, but this can only be done by its creator.
+
+```
+curl --user test@gmail.com:secret -X PUT -H "Content-Type: application/json" \
+-d '{"question":"Updated question?","answer":"Updated answer"}' \
+http://localhost:8888/api/indexcards/1
+```
+
+The response contains the updated index card:
+```json
+{"id":1,"question":"Updated question?","answer":"Updated answer"}
+```
+
+If the specified index card does not exist, the server returns `HTTP 404`.
+If the specified user is not the creator of this index card, the response contains `HTTP 403 (Forbidden)`.
+
+---
+
+### Delete an index card
+
+It is possible to delete an index card, but this can only be done by its creator.
+
+```
+curl --user test@gmail.com:secret -X DELETE http://localhost:8888/api/indexcards/1
+```
+
+If the operation was successful, the service returns `HTTP 204 (No content)`.
+
+If the specified index card does not exist, the server returns `HTTP 404`.
+If the specified user is not the creator of this index card, the response contains `HTTP 403 (Forbidden)`.
