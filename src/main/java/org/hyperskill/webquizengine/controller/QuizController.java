@@ -3,6 +3,7 @@ package org.hyperskill.webquizengine.controller;
 import org.hyperskill.webquizengine.dto.CompletionDto;
 import org.hyperskill.webquizengine.dto.QuizDto;
 import org.hyperskill.webquizengine.dto.ResultDto;
+import org.hyperskill.webquizengine.model.Quiz;
 import org.hyperskill.webquizengine.service.QuizService;
 import org.hyperskill.webquizengine.util.Utils;
 import org.slf4j.Logger;
@@ -72,8 +73,10 @@ public class QuizController {
     }
     
     @GetMapping(path = "/random", produces = APPLICATION_JSON_VALUE)
-    public QuizDto getRandomQuiz() {
-		return convertQuizEntityToDtoWithoutAnswer(service.findRandom());
+    @ResponseBody
+    public List<QuizDto> getRandomQuiz(@RequestParam(defaultValue = "1") Integer number) {
+        List<Quiz> quizzes = service.findRandom(number);
+        return quizzes.stream().map(Utils::convertQuizEntityToDtoWithAnswer).collect(Collectors.toList());
 	}
     
     @PutMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)

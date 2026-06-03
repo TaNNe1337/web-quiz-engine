@@ -101,9 +101,13 @@ public class QuizService {
     	return completionRepository.findAllByQuiz(quizid);
     }
 
-	public Quiz findRandom() {
-		var quiz = quizRepository.findRandom();
-		return quiz.orElseThrow(QuizNotFoundException::new);
+	public List<Quiz> findRandom(Integer number) {
+        if (number == null) {
+            throw new QuizNotFoundException();
+        }
+		var quizzes = quizRepository.findRandom(number);
+        if (quizzes.isEmpty()) { throw new QuizNotFoundException(); }
+		return quizzes;
 	}
 
 	public Quiz put(long id, @Valid QuizDto quizDto, String name) {

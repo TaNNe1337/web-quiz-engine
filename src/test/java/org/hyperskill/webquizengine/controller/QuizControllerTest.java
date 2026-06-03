@@ -6,7 +6,9 @@ import org.hyperskill.webquizengine.exception.InvalidAnswerOptions;
 import org.hyperskill.webquizengine.exception.QuizNotFoundException;
 import org.hyperskill.webquizengine.service.QuizService;
 import org.hyperskill.webquizengine.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hyperskill.webquizengine.testutils.TestUtils.*;
 import static org.hyperskill.webquizengine.util.Utils.convertQuizDtoToEntity;
@@ -43,12 +46,17 @@ public class QuizControllerTest {
     @MockBean
     private QuizService quizService;
 
+    @InjectMocks
+    private QuizController controller;
     @MockBean
     private UserService service;
 
     @MockBean
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-
+    @BeforeEach
+    void setUp() {
+        controller = new QuizController(quizService);
+    }
     @Test
     @WithMockUser(username = DEFAULT_USERNAME, password = DEFAULT_PASSWORD)
     public void testCreateQuiz_whenFourOptionsAndAnswerExist() throws Exception {
@@ -295,5 +303,25 @@ public class QuizControllerTest {
         // Lösche das Quiz
         mvc.perform(delete(String.format("/quizzes/%d", quizId)))
                 .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testGetRandomQuizzes_whenManyQuizzes() throws Exception {
+        var quizzes = createTestQuizzes(15);
+
+        when(quizService.findRandom(15)).thenReturn(quizzes);
+
+        mvc.perform(get("/quizzes/random")
+                .param("number", "15"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(quizzes.size())));
+    }
+    @Test
+    void getRandomQuiz_serviceThrowsException_propagatesException() {
+        when(quizService.findRandom(anyInt())).thenThrow(QuizNotFoundException.class);
+
+        assertThatThrownBy(() -> controller.getRandomQuiz(5))
+                .isInstanceOf(QuizNotFoundException.class);
     }
 }
